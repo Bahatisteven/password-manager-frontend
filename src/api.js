@@ -38,3 +38,6 @@ const getMetrics = async () => {
   const response = await axios.get(`${REACT_APP_METRICS_URL}`);
   return response.data;
 };
+
+
+export {fetchVaultItems, fetchVaultItem, addVaultItem, deleteVaultItem, getMetrics}
