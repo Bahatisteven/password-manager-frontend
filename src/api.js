@@ -1,9 +1,7 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import axios from "axios";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const REACT_METRICS_URL = process.env.REACT_APP_METRICS_URL;
 
 // fetch all vault items 
 const fetchVaultItems = async () => {
@@ -35,7 +33,7 @@ const deleteVaultItem = async (id) => {
 
 // fetch metrics
 const getMetrics = async () => {
-  const response = await axios.get(`${REACT_APP_METRICS_URL}`);
+  const response = await axios.get(`${REACT_METRICS_URL}`);
   return response.data;
 };
 
