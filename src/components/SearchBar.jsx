@@ -1,3 +1,6 @@
+import React from 'react';  
+import { Search, Plus } from 'lucide-react';
+
 const SearchBar = ({ searchTerm, onSearchChange, onAdd }) => {
   return (
     <div className="flex gap-3 mb-6">
@@ -35,3 +38,5 @@ const SearchBar = ({ searchTerm, onSearchChange, onAdd }) => {
     </div>
   );
 };
+
+export default SearchBar;

@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Shield, AlertCircle } from 'lucide-react';
+import { calculatePasswordStrength } from 'shared-utils';
+import LoadingSkeleton from './components/LoadingSkeleton.jsx';
+import ThemeSwitcher from './components/ThemeSwitcher.jsx';
 import SearchBar from './components/SearchBar.jsx';
-import VaultItem from './components/VaultItem.jsx';
+import VaultItem from './components/VaultItems.jsx';
 import VaultModal from './components/VaultModal.jsx';
 import ThemeProvider from './contexts/ThemeContext.jsx';
 
@@ -38,7 +41,7 @@ const App = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   
   const filteredItems = useMemo(() => {
     if (!searchTerm) return vaultItems;
