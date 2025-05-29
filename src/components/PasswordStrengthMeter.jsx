@@ -1,5 +1,6 @@
 import React from 'react';
 import calculatePasswordStrength from 'shared-utils/passwordStrength.js';
+
 const PasswordStrengthMeter = ({ password }) => {
   const strength = calculatePasswordStrength(password);
   const width = (strength.score / 6) * 100;
