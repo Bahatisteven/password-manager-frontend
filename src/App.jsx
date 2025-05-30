@@ -6,7 +6,7 @@ import ThemeSwitcher from './components/ThemeSwitcher.jsx';
 import SearchBar from './components/SearchBar.jsx';
 import VaultItem from './components/VaultItems.jsx';
 import VaultModal from './components/VaultModal.jsx';
-import ThemeProvider from './contexts/ThemeContext.jsx';
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
 
 const App = () => {
   const [vaultItems, setVaultItems] = useState([

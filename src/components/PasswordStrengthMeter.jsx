@@ -1,4 +1,3 @@
-import React from 'react';
 import calculatePasswordStrength from 'shared-utils/passwordStrength.js';
 
 const PasswordStrengthMeter = ({ password }) => {
