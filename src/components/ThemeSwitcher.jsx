@@ -24,7 +24,7 @@ const ThemeSwitcher = () => {
         {/* show the palette icon */}
         <Palette size={16} />
         {/* show the current theme name */}
-        <span className="text-sm font-medium">{themes[currentTheme].name}</span>
+        <span className="text-sm font-medium">{themes[currentTheme]?.name}</span>
         {/* show the chevron icon */}
         <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
