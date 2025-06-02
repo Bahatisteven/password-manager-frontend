@@ -1,64 +1,27 @@
-import React, { useState } from 'react';
-import { Palette, ChevronDown, Check } from 'lucide-react';
-import { ThemeContext } from '../contexts/ThemeContext.jsx';
+import React from 'react';
+import { useTheme } from '../hooks/useTheme';
 
 const ThemeSwitcher = () => {
-  // grab the current theme and the setter function from the theme context
-  const { currentTheme, setCurrentTheme, themes } = React.useContext(ThemeContext);
-  
-  // a state to store the opened state of the dropdown
-  const [isOpen, setIsOpen] = useState(false);
-  
+  const { currentTheme, switchTheme, themes } = useTheme();
+
   return (
     <div className="relative">
-      {/* button to toggle the dropdown */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105"
-        style={{ 
-          backgroundColor: 'var(--color-surface)',
-          color: 'var(--color-text)',
-          border: '1px solid var(--color-border)'
-        }}
+      <select
+        value={currentTheme}
+        onChange={(e) => switchTheme(e.target.value)}
+        className="appearance-none bg-bw-surface border border-bw-border rounded-lg px-4 py-2 pr-8 text-bw-text focus:ring-2 focus:ring-bw-primary focus:border-transparent transition-all duration-200 hover:shadow-md"
       >
-        {/* show the palette icon */}
-        <Palette size={16} />
-        {/* show the current theme name */}
-        <span className="text-sm font-medium">{themes[currentTheme]?.name}</span>
-        {/* show the chevron icon */}
-        <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-      
-      {/* if the dropdown is open, show the theme list */}
-      {isOpen && (
-        <div 
-          className="absolute top-full left-0 mt-2 py-2 rounded-lg shadow-xl border backdrop-blur-lg z-50 min-w-full"
-          style={{ 
-            backgroundColor: 'var(--color-surface)',
-            borderColor: 'var(--color-border)'
-          }}
-        >
-          {/* loop through the themes and show each one */}
-          {Object.entries(themes).map(([key, theme]) => (
-            <button
-              key={key}
-              onClick={() => {
-                // set the current theme to the selected one
-                setCurrentTheme(key);
-                // close the dropdown
-                setIsOpen(false);
-              }}
-              className="w-full px-4 py-2 text-left text-sm hover:bg-opacity-50 transition-colors flex items-center gap-2"
-              style={{ color: 'var(--color-text)' }}
-            >
-              {/* show the check icon if the theme is the current one */}
-              {currentTheme === key && <Check size={14} style={{ color: 'var(--color-primary)' }} />}
-              {/* show the theme name */}
-              <span className={currentTheme !== key ? 'ml-6' : ''}>{theme.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
+        {Object.entries(themes).map(([key, label]) => (
+          <option key={key} value={key}>
+            {label}
+          </option>
+        ))}
+      </select>
+      <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+        <svg className="w-4 h-4 text-bw-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
     </div>
   );
 };

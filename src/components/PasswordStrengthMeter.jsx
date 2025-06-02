@@ -1,23 +1,20 @@
-import calculatePasswordStrength from 'shared-utils/passwordStrength.js';
+import React from 'react';
+import { calculatePasswordStrength } from '../utils/passwordStrength.js';
 
 const PasswordStrengthMeter = ({ password }) => {
   const strength = calculatePasswordStrength(password);
-  const width = (strength.score / 6) * 100;
-  
+  const percentage = (strength.score / 6) * 100;
+
   return (
-    <div className="mt-3">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
-          Password Strength
-        </span>
-        <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-          {strength.label}
-        </span>
+    <div className="mt-2">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-sm text-bw-text-secondary">Password Strength</span>
+        <span className="text-sm font-medium text-bw-text">{strength.label}</span>
       </div>
-      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-        <div 
-          className={`h-full transition-all duration-300 ${strength.color}`}
-          style={{ width: `${width}%` }}
+      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all duration-300 ${strength.color}`}
+          style={{ width: `${percentage}%` }}
         />
       </div>
     </div>

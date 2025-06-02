@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Password Manager Default Theme */
+  --color-primary: #175ddc;
+  --color-secondary: #3c8dbc;
+  --color-accent: #17a2b8;
+  --color-bg: #ffffff;
+  --color-surface: #f8f9fa;
+  --color-text: #212529;
+  --color-text-secondary: #6c757d;
+  --color-border: #dee2e6;
+  --color-hover: #f1f3f4;
+}
+
+[data-theme="midnight"] {
+  --color-primary: #8b5cf6;
+  --color-secondary: #a855f7;
+  --color-accent: #c084fc;
+  --color-bg: #0f0f23;
+  --color-surface: #1a1a2e;
+  --color-text: #eee6ff;
+  --color-text-secondary: #a78bfa;
+  --color-border: #2d2d44;
+  --color-hover: #252541;
+}
+
+[data-theme="slate"] {
+  --color-primary: #475569;
+  --color-secondary: #64748b;
+  --color-accent: #94a3b8;
+  --color-bg: #f8fafc;
+  --color-surface: #f1f5f9;
+  --color-text: #1e293b;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
+  --color-hover: #f1f5f9;
+}
+
+@layer components {
+  .ripple-effect {
+    @apply relative overflow-hidden;
+  }
+  
+  .ripple-effect::before {
+    content: '';
+    @apply absolute inset-0 bg-white/20 rounded-full scale-0 opacity-0;
+    transition: transform 0.3s, opacity 0.3s;
+  }
+  
+  .ripple-effect:active::before {
+    @apply scale-100 opacity-100;
+  }
+
+  .glassmorphism {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20;
+  }
+
+  .glassmorphism-dark {
+    @apply backdrop-blur-xl bg-black/10 border border-black/20;
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input:focus, button:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
