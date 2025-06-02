@@ -1,271 +1,270 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Shield } from 'lucide-react';
-import PasswordStrengthMeter from './PasswordStrengthMeter.jsx';
+import PasswordStrengthMeter from './PasswordStrengthMeter';
 
-const VaultModal = ({ isOpen, onClose, onSave, editingItem }) => {
-  // form data
+const VaultModal = ({ item, isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: '',
     username: '',
     password: '',
-    website: '',
-    type: 'login',
-    notes: ''
+    uri: '',
+    notes: '',
+    folder: '',
+    favorite: false,
+    type: 'login'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   useEffect(() => {
-    // reset form data when modal is opened or closed
-    if (editingItem) {
-      setFormData(editingItem);
+    if (item) {
+      setFormData(item);
     } else {
       setFormData({
         name: '',
         username: '',
         password: '',
-        website: '',
-        type: 'login',
-        notes: ''
+        uri: '',
+        notes: '',
+        folder: '',
+        favorite: false,
+        type: 'login'
       });
     }
-  }, [editingItem, isOpen]);
-  
-  // handle form submission
+  }, [item]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // simulate API call
-    // this is a temporary solution until we have a real API
-    // it will be replaced with an actual API call in the future
+    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // save the form data
-    // if it's an existing item, update it, otherwise create a new one
-    onSave({
-      ...formData,
-      id: editingItem?.id || Date.now().toString()
-    });
+    onSave(formData);
     setIsLoading(false);
-    onClose();
   };
-  
-  // generate a random password and save it to the form data
-  // this is a utility function used when the user clicks the "Generate Password" button
-  const generateRandomPassword = () => {
-    // possible characters used in the password
+
+  const generatePassword = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-    // generate a 16 character password
     let password = '';
     for (let i = 0; i < 16; i++) {
-      // randomly select a character from the list of possible characters
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    // save the generated password to the form data
     setFormData({ ...formData, password });
   };
-  
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    // You could add a toast notification here
+  };
+
   if (!isOpen) return null;
-  
 
   return (
-    // modal container with backdrop and form 
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 backdrop-blur-lg"
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-        onClick={onClose}
-      />
-
-      {/* modal content */}
-
-      <div 
-        className="relative w-full max-w-md rounded-xl shadow-2xl border backdrop-blur-lg transform transition-all duration-300 scale-100"
-        style={{ 
-          backgroundColor: 'var(--color-surface)',
-          borderColor: 'var(--color-border)'
-        }}
-      >
-        {/* modal header with close button and title */}
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-6" style={{ color: 'var(--color-text)' }}>
-            {editingItem ? 'Edit Item' : 'Add New Item'}
-          </h2>
-
-          {/* form for adding and editing item */}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text)' }}>
-                Type
-              </label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border transition-colors"
-                style={{ 
-                  backgroundColor: 'var(--color-surface)',
-                  borderColor: 'var(--color-border)',
-                  color: 'var(--color-text)'
-                }}
-              >
-                <option value="login">Login</option>
-                <option value="card">Card</option>
-                <option value="note">Secure Note</option>
-              </select>
-            </div>
-
-            {/* form fields */}
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text)' }}>
-                Name
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 rounded-lg border transition-colors"
-                style={{ 
-                  backgroundColor: 'var(--color-surface)',
-                  borderColor: 'var(--color-border)',
-                  color: 'var(--color-text)'
-                }}
-                required
-              />
-            </div>
-            
-            {/* conditional fields based on type */}
-
-            {formData.type === 'login' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text)' }}>
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border transition-colors"
-                    style={{ 
-                      backgroundColor: 'var(--color-surface)',
-                      borderColor: 'var(--color-border)',
-                      color: 'var(--color-text)'
-                    }}
-                  />
-                </div>
-                
-                {/* password field */}
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text)' }}>
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full px-3 py-2 pr-20 rounded-lg border transition-colors"
-                      style={{ 
-                        backgroundColor: 'var(--color-surface)',
-                        borderColor: 'var(--color-border)',
-                        color: 'var(--color-text)'
-                      }}
-                    />
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="p-1 rounded"
-                        style={{ color: 'var(--color-textSecondary)' }}
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={generateRandomPassword}
-                        className="p-1 rounded"
-                        style={{ color: 'var(--color-primary)' }}
-                        title="Generate password"
-                      >
-                        <Shield size={16} />
-                      </button>
-                    </div>
-                  </div>
-                  {formData.password && <PasswordStrengthMeter password={formData.password} />}
-                </div>
-                
-                {/* website field */}
-
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text)' }}>
-                    Website
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.website}
-                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border transition-colors"
-                    style={{ 
-                      backgroundColor: 'var(--color-surface)',
-                      borderColor: 'var(--color-border)',
-                      color: 'var(--color-text)'
-                    }}
-                    placeholder="https://example.com"
-                  />
-                </div>
-              </>
-            )}
-
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text)' }}>
-                Notes
-              </label>
-              <textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 rounded-lg border transition-colors resize-none"
-                style={{ 
-                  backgroundColor: 'var(--color-surface)',
-                  borderColor: 'var(--color-border)',
-                  color: 'var(--color-text)'
-                }}
-              />
-            </div>
-            
-            <div className="flex gap-3 pt-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
+          onClick={onClose}
+        />
+        
+        <div className="inline-block align-bottom glassmorphism rounded-lg text-left overflow-hidden shadow-xl transform transition-all duration-300 animate-slide-up sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <form onSubmit={handleSubmit} className="bg-bw-bg px-6 pt-6 pb-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-medium text-bw-text">
+                {item ? 'Edit Item' : 'Add New Item'}
+              </h3>
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 rounded-lg border transition-colors"
-                style={{ 
-                  borderColor: 'var(--color-border)',
-                  color: 'var(--color-text)'
-                }}
+                className="text-bw-text-secondary hover:text-bw-text transition-colors duration-200"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-bw-text mb-1">
+                  Type
+                </label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full px-3 py-2 border border-bw-border rounded-lg bg-bw-surface text-bw-text focus:ring-2 focus:ring-bw-primary focus:border-transparent"
+                >
+                  <option value="login">Login</option>
+                  <option value="secure-note">Secure Note</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-bw-text mb-1">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-bw-border rounded-lg bg-bw-surface text-bw-text focus:ring-2 focus:ring-bw-primary focus:border-transparent"
+                  placeholder="Enter item name"
+                />
+              </div>
+
+              {formData.type === 'login' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-bw-text mb-1">
+                      Username
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formData.username}
+                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                        className="w-full px-3 py-2 pr-10 border border-bw-border rounded-lg bg-bw-surface text-bw-text focus:ring-2 focus:ring-bw-primary focus:border-transparent"
+                        placeholder="Enter username"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(formData.username)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-bw-text-secondary hover:text-bw-text"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-bw-text mb-1">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className="w-full px-3 py-2 pr-20 border border-bw-border rounded-lg bg-bw-surface text-bw-text focus:ring-2 focus:ring-bw-primary focus:border-transparent"
+                        placeholder="Enter password"
+                      />
+                      <div className="absolute inset-y-0 right-0 flex items-center space-x-1 pr-3">
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-bw-text-secondary hover:text-bw-text"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {showPassword ? (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464M9.878 9.878L8.464 8.464" />
+                            ) : (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            )}
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(formData.password)}
+                          className="text-bw-text-secondary hover:text-bw-text"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <PasswordStrengthMeter password={formData.password} />
+                    <button
+                      type="button"
+                      onClick={generatePassword}
+                      className="mt-2 text-sm text-bw-primary hover:text-bw-secondary transition-colors duration-200"
+                    >
+                      Generate Password
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-bw-text mb-1">
+                      Website URL
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.uri}
+                      onChange={(e) => setFormData({ ...formData, uri: e.target.value })}
+                      className="w-full px-3 py-2 border border-bw-border rounded-lg bg-bw-surface text-bw-text focus:ring-2 focus:ring-bw-primary focus:border-transparent"
+                      placeholder="https://example.com"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-bw-text mb-1">
+                  Notes
+                </label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-bw-border rounded-lg bg-bw-surface text-bw-text focus:ring-2 focus:ring-bw-primary focus:border-transparent"
+                  placeholder="Add notes..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-bw-text mb-1">
+                  Folder
+                </label>
+                <select
+                  value={formData.folder}
+                  onChange={(e) => setFormData({ ...formData, folder: e.target.value })}
+                  className="w-full px-3 py-2 border border-bw-border rounded-lg bg-bw-surface text-bw-text focus:ring-2 focus:ring-bw-primary focus:border-transparent"
+                >
+                  <option value="">No Folder</option>
+                  <option value="Work">Work</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Entertainment">Entertainment</option>
+                </select>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  id="favorite"
+                  type="checkbox"
+                  checked={formData.favorite}
+                  onChange={(e) => setFormData({ ...formData, favorite: e.target.checked })}
+                  className="h-4 w-4 text-bw-primary focus:ring-bw-primary border-bw-border rounded"
+                />
+                <label htmlFor="favorite" className="ml-2 block text-sm text-bw-text">
+                  Add to favorites
+                </label>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-bw-border">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-bw-text-secondary bg-bw-surface hover:bg-bw-hover border border-bw-border rounded-lg transition-colors duration-200"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ 
-                  backgroundColor: 'var(--color-primary)',
-                  color: 'white'
-                }}
+                className="ripple-effect px-4 py-2 text-sm font-medium text-white bg-bw-primary hover:bg-bw-secondary disabled:opacity-50 rounded-lg transition-colors duration-200 flex items-center space-x-2"
               >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save'
+                {isLoading && (
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
                 )}
+                <span>{isLoading ? 'Saving...' : 'Save'}</span>
               </button>
             </div>
           </form>
