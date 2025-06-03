@@ -4,7 +4,7 @@ import SearchBar from './components/SearchBar.jsx';
 import VaultModal from './components/VaultModal.jsx';
 import ThemeSwitcher from './components/ThemeSwitcher.jsx';
 import LoadingSkeleton from './components/LoadingSkeleton.jsx';
-import { mockVaultItems } from './data/mockData.js';
+import { fetchVaultItems, addVaultItem, updateVaultItem, deleteVaultItem } from './api.js';
 import './styles/globals.css';
 
 function App() {
@@ -14,16 +14,27 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState({
+    isOpen: false,
+    item: null,
+    isDeleting: false
+  });
 
-  // Simulate loading data
+  // fetching data from the API
   useEffect(() => {
-    const loadData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setVaultItems(mockVaultItems);
-      setIsLoading(false);
-    };
-    loadData();
-  }, []);
+  const loadData = async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchVaultItems();
+      setVaultItems(data);
+    } catch (err) {
+      console.error('Failed to fetch vault items:', err);
+      setVaultItems([]);
+    }
+    setIsLoading(false);
+  };
+  loadData();
+}, []);
 
   const filteredItems = useMemo(() => {
     return vaultItems.filter(item =>
@@ -46,25 +57,82 @@ function App() {
     setIsModalOpen(true);
   };
 
-  const handleSave = (formData) => {
+  // handle save action
+  const handleSave = async (formData) => {
+  try {
     if (editingItem) {
-      setVaultItems(items =>
-        items.map(item =>
-          item.id === editingItem.id ? { ...formData, id: editingItem.id } : item
-        )
-      );
+      // update existing item in backend
+      await updateVaultItem(editingItem.id, formData);
     } else {
-      const newItem = {
-        ...formData,
-        id: Date.now().toString()
-      };
-      setVaultItems(items => [...items, newItem]);
+      // add new item to backend
+      await addVaultItem(formData);
     }
+    // refresh the list from backend
+    const data = await fetchVaultItems();
+    setVaultItems(data);
     setIsModalOpen(false);
     setEditingItem(null);
     setSelectedItem(null);
+  } catch (error) {
+    console.error("Failed to save vault item:", error);
+    alert("Failed to save item. Please try again.");
+  }
+};
+
+  // handle delete button click
+  const handleDeleteClick = (item, event) => {
+    // prevent triggering the item click when delete button is clicked
+    event.stopPropagation();
+    setDeleteConfirmModal({
+      isOpen: true,
+      item: item,
+      isDeleting: false
+    });
   };
 
+  // handle delete confirmation
+  const handleDeleteConfirm = async () => {
+    const { item } = deleteConfirmModal;
+    if (!item) return;
+
+    setDeleteConfirmModal(prev => ({ ...prev, isDeleting: true }));
+    
+    try {
+      await deleteVaultItem(item.id);
+      // refresh the list from backend
+      const data = await fetchVaultItems();
+      setVaultItems(data);
+      
+      // close delete modal
+      setDeleteConfirmModal({
+        isOpen: false,
+        item: null,
+        isDeleting: false
+      });
+      
+      // close edit modal if the deleted item was being edited
+      if (selectedItem?.id === item.id) {
+        setIsModalOpen(false);
+        setEditingItem(null);
+        setSelectedItem(null);
+      }
+    } catch (error) {
+      console.error("Failed to delete vault item:", error);
+      alert("Failed to delete item. Please try again.");
+      setDeleteConfirmModal(prev => ({ ...prev, isDeleting: false }));
+    }
+  };
+
+  // handle delete cancel
+  const handleDeleteCancel = () => {
+    setDeleteConfirmModal({
+      isOpen: false,
+      item: null,
+      isDeleting: false
+    });
+  };
+
+  // handle modal close
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingItem(null);
@@ -140,6 +208,7 @@ function App() {
         </div>
 
         {/* Vault Items */}
+
         <div className="bg-bw-surface border border-bw-border rounded-lg p-6">
           <h2 className="text-lg font-semibold text-bw-text mb-4">
             Your Vault ({filteredItems.length} items)
@@ -175,6 +244,7 @@ function App() {
                   item={item}
                   onClick={handleItemClick}
                   isSelected={selectedItem?.id === item.id}
+                  onDelete={handleDeleteClick}
                 />
               ))}
             </div>
@@ -182,15 +252,75 @@ function App() {
         </div>
 
         {/* Modal */}
+
         <VaultModal
           item={editingItem}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
           onSave={handleSave}
+          onDelete={editingItem ? (e) => handleDeleteClick(editingItem, e) : null}
         />
+        {/* delete confirmation modal */}
+        {deleteConfirmModal.isOpen && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div 
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
+                onClick={!deleteConfirmModal.isDeleting ? handleDeleteCancel : undefined}
+              />
+              
+              <div className="inline-block align-bottom glassmorphism rounded-lg text-left overflow-hidden shadow-xl transform transition-all duration-300 animate-slide-up sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div className="bg-bw-bg px-6 pt-6 pb-6">
+                  <div className="flex items-center mb-4">
+                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                      <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium text-bw-text mb-2">
+                      Delete "{deleteConfirmModal.item?.name}"?
+                    </h3>
+                    <p className="text-sm text-bw-text-secondary mb-6">
+                      This action cannot be undone. This will permanently delete the vault item and remove all associated data.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={handleDeleteCancel}
+                      disabled={deleteConfirmModal.isDeleting}
+                      className="px-4 py-2 text-sm font-medium text-bw-text-secondary bg-bw-surface hover:bg-bw-hover border border-bw-border rounded-lg transition-colors duration-200 disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteConfirm}
+                      disabled={deleteConfirmModal.isDeleting}
+                      className="ripple-effect px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                    >
+                      {deleteConfirmModal.isDeleting && (
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      )}
+                      <span>{deleteConfirmModal.isDeleting ? 'Deleting...' : 'Delete'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
 
 export default App;
