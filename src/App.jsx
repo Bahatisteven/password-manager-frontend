@@ -63,6 +63,7 @@ function App() {
     if (editingItem) {
       // update existing item in backend
       await updateVaultItem(editingItem.id, formData);
+      console.log("Item updated successfully");
     } else {
       // add new item to backend
       await addVaultItem(formData);
