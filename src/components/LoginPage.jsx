@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Shield, Lock, Mail, AlertCircle } from 'lucide-react';
 
-function LoginPage() {
+
+
+// Accept onLoginSuccess as a prop
+function LoginPage({ onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -41,6 +44,14 @@ function LoginPage() {
     return 'Strong';
   };
 
+  // handle form submission and call onLoginSuccess after "login"
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // TODO: Add your real login/signup logic here (API call)
+    // If login/signup is successful:
+    if (onLoginSuccess) onLoginSuccess();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -62,7 +73,8 @@ function LoginPage() {
             </p>
           </div>
 
-          <form className="space-y-5">
+          {/* CHANGED: Add onSubmit handler */}
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Email Field */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
