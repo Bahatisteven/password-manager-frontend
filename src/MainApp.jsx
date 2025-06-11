@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import App from "./App";
-import LoginPage from "./components/LoginPage.jsx";
+import SignUp from "./components/SignUp.jsx";
 
 function MainApp() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -13,7 +13,7 @@ function MainApp() {
       {isAuthenticated ? (
         <App />
       ) : (
-        <LoginPage onLoginSuccess={handleLoginSuccess} />
+        <SignUp onLoginSuccess={handleLoginSuccess} />
       )}
     </>
   );
