@@ -1,22 +1,46 @@
-import React, { useState } from "react";
-import App from "./App";
-import SignUp from "./components/SignUp.jsx";
+ import React, { useState } from "react";
+ import App from "./App";
+ import SignUp from "./components/SignUp.jsx";
+ import LoginPage from ".components/LoginPage.jsx";
 
-function MainApp() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+ function MainApp() {
+   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // This function will be called after successful login
-  const handleLoginSuccess = () => setIsAuthenticated(true);
+   // called after successful login or sign-up
+   const handleLoginSuccess = () => setIsAuthenticated(true);
 
-  return (
-    <>
-      {isAuthenticated ? (
-        <App />
-      ) : (
-        <SignUp onLoginSuccess={handleLoginSuccess} />
-      )}
-    </>
-  );
-}
+   return (
+     // browser router to enable routing in the app
+     <BrowserRouter>
+     <Routes>
+       {/* sign-in (login) route */}
+       <Route
+       path="/signin"
+       element={<LoginPage onLoginSuccess={handleLoginSuccess}  />}
+       />
 
-export default MainApp;
+       {/* signup route */}
+       <Route
+       path="/signup"
+       element={<SignUp onLoginSuccess={handleLoginSuccess} />}
+       />
+       {/* main vault app route */}
+       <Route
+       path="/"
+       element={
+         isAuthenticated ? (
+           <App />
+         ) : (
+           // if not authenticated redirect to sign in
+           <Navigate to="/signin" replace />
+         )
+       }
+       />
+       {/* catch-all: redirect unknown routes to signin */}
+       <Route path="*" element={<Navigate to="/signin" replace />}/>
+     </Routes>
+     </BrowserRouter>
+   )
+ };
+
+ export default MainApp;
